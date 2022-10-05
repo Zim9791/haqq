@@ -1,0 +1,26 @@
+syntax = "proto3";
+package haqq.coinomics.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/haqq-network/haqq/x/coinomics/types";
+
+  // coinomics mint distribution's of the minted denom
+  // https://islamiccoin.net/wp
+  // - 10%(evergreen_dao) goes to Evergreen DAO.
+  // - 1%(block_proposer_min) to 5%(block_proposer_max) goes to a block proposer and its delegators.
+  // - (staking_rewards) The remainder is distributed proportionally to all bonded validators and their delegators.
+message MintDistribution {
+  string evergreen_dao = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  string block_proposer_min = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+  string block_proposer_max = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+}

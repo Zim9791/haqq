@@ -75,10 +75,10 @@ if [[ $1 == "pending" ]]; then
 fi
 
 # Allocate genesis accounts (cosmos formatted addresses)
-$BINARY add-genesis-account $KEY 100000000000000000000000000aISLM --keyring-backend $KEYRING &> /dev/null
+$BINARY add-genesis-account $KEY 20000000000000000000000000000aISLM --keyring-backend $KEYRING &> /dev/null
 
 # Sign genesis transaction
-$BINARY gentx $KEY 1000000000000000000000aISLM --keyring-backend $KEYRING --chain-id $CHAINID &> /dev/null
+$BINARY gentx $KEY 20000000000000000000000000000aISLM --keyring-backend $KEYRING --chain-id $CHAINID &> /dev/null
 
 # Collect genesis tx
 $BINARY collect-gentxs &> /dev/null

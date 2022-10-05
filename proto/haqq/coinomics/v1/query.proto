@@ -1,0 +1,69 @@
+syntax = "proto3";
+package haqq.coinomics.v1;
+
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "haqq/coinomics/v1/genesis.proto";
+
+option go_package = "github.com/haqq-network/haqq/x/coinomics/types";
+
+// Query provides defines the gRPC querier service.
+service Query {
+  rpc Era(QueryEraRequest) returns (QueryEraResponse) {
+    option (google.api.http).get = "/haqqd/coinomics/v1/era";
+  }
+
+  rpc EraTargetSupply(QueryEraTargetSupplyRequest) returns (QueryEraTargetSupplyResponse) {
+    option (google.api.http).get = "/haqqd/coinomics/v1/era_target_supply";
+  }
+
+  rpc TotalTargetSupply(QueryTotalTargetSupplyRequest) returns (QueryTotalTargetSupplyResponse) {
+    option (google.api.http).get = "/haqqd/coinomics/v1/total_target_supply";
+  }
+
+  rpc InflationRate(QueryInflationRateRequest)
+      returns (QueryInflationRateResponse) {
+    option (google.api.http).get = "/haqq/coinomics/v1/inflation_rate";
+  }
+
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/haqq/coinomics/v1/params";
+  }
+}
+
+message QueryEraRequest {}
+message QueryEraResponse {
+  uint64 era = 1;
+}
+
+message QueryEraTargetSupplyRequest {}
+message QueryEraTargetSupplyResponse {
+  cosmos.base.v1beta1.Coin era_target_supply = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Coin",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message QueryTotalTargetSupplyRequest {}
+message QueryTotalTargetSupplyResponse {
+  cosmos.base.v1beta1.Coin total_target_supply = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Coin",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message QueryInflationRateRequest {}
+message QueryInflationRateResponse {
+  // rate by which the total supply increases within one era
+  string inflation_rate = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false
+  ];
+}
+
+message QueryParamsRequest {}
+message QueryParamsResponse {
+  // params defines the parameters of the module.
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
