@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"github.com/haqq-network/haqq/x/ibc/apps/firewall"
 	"io"
 	"net/http"
 	"os"
@@ -421,7 +422,7 @@ func NewHaqq(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
 		AddRoute(erc20types.RouterKey, erc20.NewErc20ProposalHandler(&app.Erc20Keeper))
-		//AddRoute(incentivestypes.RouterKey, incentives.NewIncentivesProposalHandler(&app.IncentivesKeeper))
+	//AddRoute(incentivestypes.RouterKey, incentives.NewIncentivesProposalHandler(&app.IncentivesKeeper))
 
 	govKeeper := govkeeper.NewKeeper(
 		appCodec, keys[govtypes.StoreKey], app.GetSubspace(govtypes.ModuleName),
@@ -466,6 +467,7 @@ func NewHaqq(
 		epochskeeper.NewMultiEpochHooks(
 		// insert epoch hooks receivers here
 		// app.IncentivesKeeper.Hooks(),
+		// app.InflationKeeper.Hooks(),
 		),
 	)
 
@@ -486,9 +488,10 @@ func NewHaqq(
 	// RecvPacket, message that originates from core IBC and goes down to app, the flow is the otherway
 	// channel.RecvPacket -> ibcFirewall.OnRecvPacket -> transfer.OnRecvPacket
 
+	ics4Wrapper := firewall.NewICS4Wrapper(app.IBCKeeper.ChannelKeeper)
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, // ICS4 Wrapper: claims IBC middleware
+		ics4Wrapper, // ICS4 Wrapper: claims IBC middleware
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
@@ -503,8 +506,9 @@ func NewHaqq(
 	var transferStack porttypes.IBCModule
 
 	transferStack = transfer.NewIBCModule(app.TransferKeeper)
-	// TODO Add IBC Firewall Middleware
-	// transferStack = firewall.NewIBCMiddleware(*app.FirewallKeeper, transferStack)
+
+	// Add IBC Firewall Middleware
+	transferStack = firewall.NewIBCMiddleware(transferStack, app.IBCKeeper.ChannelKeeper)
 
 	// // Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
@@ -598,6 +602,7 @@ func NewHaqq(
 		vestingtypes.ModuleName,
 		erc20types.ModuleName,
 		coinomicstypes.ModuleName,
+
 		// incentivestypes.ModuleName,
 	)
 
